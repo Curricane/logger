@@ -20,6 +20,16 @@ type FileLogger struct {
 	lastSplitHour int
 }
 
+/*
+config := map[string]string{
+	"log_path":       "./",
+	"log_name":       "file_log",
+	"log_level":      "info",
+	"log_split_type": "hour", // optional default hour
+	"log_split_size": "",     // optional default 104857600 即100M
+	"log_chan_size":  "",     // optional default 50000
+}
+*/
 func NewFileLoger(config map[string]string) (log LogInterface, err error) {
 	logPath, ok := config["log_path"]
 	if !ok {
@@ -299,6 +309,17 @@ func (f *FileLogger) Fatal(format string, args ...interface{}) {
 }
 
 func (f *FileLogger) Close() {
+
+	// 最多等待delay时间，让chain中的数据写完
+	delay := time.Microsecond * 0
+	for len(f.LogChan) > 0 {
+		time.Sleep(time.Millisecond * 100)
+		delay += time.Millisecond * 100
+		if delay > time.Microsecond*1500 {
+			break
+		}
+	}
+
 	//检查一遍
 	if f.file != nil {
 		err := f.file.Close()

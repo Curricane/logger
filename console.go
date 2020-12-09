@@ -9,6 +9,7 @@ type ConsoleLogger struct {
 	level int
 }
 
+// NewConsoleLogger config := map[string]string{"log_levle": "info"}
 func NewConsoleLogger(config map[string]string) (log LogInterface, err error) {
 	logLevel, ok := config["log_level"]
 	if !ok {
